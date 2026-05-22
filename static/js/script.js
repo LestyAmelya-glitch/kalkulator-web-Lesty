@@ -1,68 +1,70 @@
-/* Elemen utama */
-const forms = document.querySelectorAll("form.calc-form");
-const resultPanel = document.getElementById("resultPanel");
-const historyList = document.getElementById("historyList");
-const emptyHistory = document.getElementById("emptyHistory");
-const themeToggle = document.getElementById("themeToggle");
+// --- Elemen DOM ---
+const forms           = document.querySelectorAll("form.calc-form");
+const resultPanel     = document.getElementById("resultPanel");
+const historyList     = document.getElementById("historyList");
+const emptyHistory    = document.getElementById("emptyHistory");
+const themeToggle     = document.getElementById("themeToggle");
 const clearHistoryBtn = document.getElementById("clearHistory");
-const logikaOperator = document.getElementById("logikaOperator");
-const logikaBGroup = document.getElementById("logikaBGroup");
+const logikaOperator  = document.getElementById("logikaOperator");
+const logikaBGroup    = document.getElementById("logikaBGroup");
 
-/* Riwayat lokal */
+// --- Sound effect ---
+const clickSound   = new Audio("/static/suaratambahan/efektekan.mp3");
+const resultSound  = new Audio("/static/suaratambahan/efekhasil.mp3");
+
+// --- Riwayat dari LocalStorage ---
 let history = JSON.parse(localStorage.getItem("calcHistory") || "[]");
 
-/* Inisialisasi tampilan */
+// --- Inisialisasi Awal ---
 renderHistory();
 applySavedTheme();
 updateLogikaFields();
 
-/* Event submit form */
-forms.forEach((form) => {
-  form.addEventListener("submit", handleFormSubmit);
+// --- Efek klik pada semua tombol ---
+document.querySelectorAll("button").forEach((button) => {
+  button.addEventListener("click", () => {
+    clickSound.currentTime = 0;
+    clickSound.play().catch(() => {});
+  });
 });
 
-/* Toggle tema */
+// --- Event Submit Semua Form ---
+forms.forEach((form) => form.addEventListener("submit", handleFormSubmit));
+
+// --- Toggle Dark / Light Mode ---
 themeToggle.addEventListener("click", () => {
   document.body.classList.toggle("dark-mode");
-  const mode = document.body.classList.contains("dark-mode") ? "dark" : "light";
-  themeToggle.textContent = document.body.classList.contains("dark-mode") ? "Light Mode" : "Dark Mode";
-  localStorage.setItem("themeMode", mode);
+  const isDark = document.body.classList.contains("dark-mode");
+  themeToggle.textContent = isDark ? "Light Mode" : "Dark Mode";
+  localStorage.setItem("themeMode", isDark ? "dark" : "light");
 });
 
-/* Hapus riwayat */
+// --- Hapus Semua Riwayat ---
 clearHistoryBtn.addEventListener("click", () => {
   history = [];
   localStorage.removeItem("calcHistory");
   renderHistory();
 });
 
-/* Tampilkan/sembunyikan B untuk NOT */
+// --- Tampilkan / Sembunyikan Input B pada NOT ---
 logikaOperator.addEventListener("change", updateLogikaFields);
 
-/* Atur field logika */
 function updateLogikaFields() {
-  if (logikaOperator.value === "not") {
-    logikaBGroup.style.display = "none";
-    logikaBGroup.querySelector("select").removeAttribute("required");
-  } else {
-    logikaBGroup.style.display = "block";
-    logikaBGroup.querySelector("select").setAttribute("required", "true");
-  }
+  const isNot = logikaOperator.value === "not";
+  logikaBGroup.style.display = isNot ? "none" : "block";
+  logikaBGroup.querySelector("select").toggleAttribute("required", !isNot);
 }
 
-/* Kirim data ke backend */
+// --- Kirim Form ke Backend ---
 async function handleFormSubmit(event) {
   event.preventDefault();
-
-  const form = event.currentTarget;
+  const form   = event.currentTarget;
   const apiUrl = form.dataset.api;
-  const label = form.dataset.label;
-  const formData = new FormData(form);
-  const body = {};
+  const label  = form.dataset.label;
 
-  formData.forEach((value, key) => {
-    body[key] = value.trim();
-  });
+  // --- Kumpulkan Data Form ---
+  const body = {};
+  new FormData(form).forEach((value, key) => (body[key] = value.trim()));
 
   try {
     const response = await fetch(apiUrl, {
@@ -72,23 +74,20 @@ async function handleFormSubmit(event) {
     });
 
     const data = await response.json();
-
-    if (!response.ok) {
-      renderError(data.error || "Terjadi kesalahan.");
-      return;
-    }
+    if (!response.ok) { renderError(data.error || "Terjadi kesalahan."); return; }
 
     renderResult(data, label);
     addToHistory(label, data);
-  } catch (error) {
+
+  } catch {
     renderError("Tidak bisa terhubung ke server.");
   }
 }
 
-/* Tampilkan hasil */
+// --- Tampilkan Hasil ke Panel ---
 function renderResult(data, category) {
   const stepsHtml = data.steps
-    ? `<ol class="ps-3 mb-0">${data.steps.map((step) => `<li>${step}</li>`).join("")}</ol>`
+    ? `<ol class="ps-3 mb-0">${data.steps.map((s) => `<li>${s}</li>`).join("")}</ol>`
     : "";
 
   resultPanel.innerHTML = `
@@ -97,17 +96,17 @@ function renderResult(data, category) {
     <p class="mb-1"><strong>Formula:</strong> ${data.formula || "-"}</p>
     <div><strong>Langkah:</strong>${stepsHtml}</div>
   `;
+
+  resultSound.currentTime = 0;
+  resultSound.play().catch(() => {});
 }
 
-/* Format hasil */
+// --- Format Hasil (Array atau Angka) ---
 function formatResult(data) {
-  if (Array.isArray(data.result)) {
-    return data.result.join(", ");
-  }
-  return data.result;
+  return Array.isArray(data.result) ? data.result.join(", ") : data.result;
 }
 
-/* Tampilkan error */
+// --- Tampilkan Pesan Error ---
 function renderError(message) {
   resultPanel.innerHTML = `
     <div class="alert alert-danger mb-0" role="alert">
@@ -116,30 +115,26 @@ function renderError(message) {
   `;
 }
 
-/* Tambah riwayat */
+// --- Simpan Entri ke Riwayat ---
 function addToHistory(label, data) {
   const entry = {
     id: Date.now(),
     timestamp: new Date().toLocaleString("id-ID", {
-      hour: "2-digit",
-      minute: "2-digit",
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
+      hour: "2-digit", minute: "2-digit",
+      day: "2-digit", month: "2-digit", year: "numeric",
     }),
     category: label,
-    formula: data.formula || "-",
-    result: formatResult(data),
+    formula:  data.formula || "-",
+    result:   formatResult(data),
   };
 
   history.unshift(entry);
   if (history.length > 10) history.pop();
-
   localStorage.setItem("calcHistory", JSON.stringify(history));
   renderHistory();
 }
 
-/* Render riwayat */
+// --- Render Daftar Riwayat ---
 function renderHistory() {
   historyList.innerHTML = "";
 
@@ -165,15 +160,9 @@ function renderHistory() {
   });
 }
 
-/* Tema tersimpan */
+// --- Terapkan Tema Tersimpan ---
 function applySavedTheme() {
-  const mode = localStorage.getItem("themeMode") || "light";
-
-  if (mode === "dark") {
-    document.body.classList.add("dark-mode");
-    themeToggle.textContent = "Light Mode";
-  } else {
-    document.body.classList.remove("dark-mode");
-    themeToggle.textContent = "Dark Mode";
-  }
+  const isDark = localStorage.getItem("themeMode") === "dark";
+  document.body.classList.toggle("dark-mode", isDark);
+  themeToggle.textContent = isDark ? "Light Mode" : "Dark Mode";
 }

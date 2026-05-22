@@ -1,18 +1,18 @@
-/* Root warna utama */
+/* --- Variabel Warna Utama --- */
 :root {
-  --bg: #D9ED92;
-  --bg-2: #B5E48C;
-  --bg-3: #99D98C;
-  --primary: #76C893;
+  --bg:        #D9ED92;
+  --bg-2:      #B5E48C;
+  --bg-3:      #99D98C;
+  --primary:   #76C893;
   --secondary: #52B69A;
-  --surface: rgba(255, 255, 255, 0.82);
-  --text: #163020;
-  --muted: #3a5a40;
-  --border: rgba(22, 48, 32, 0.12);
-  --shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
+  --surface:   rgba(255, 255, 255, 0.82);
+  --text:      #163020;
+  --muted:     #3a5a40;
+  --border:    rgba(22, 48, 32, 0.12);
+  --shadow:    0 18px 40px rgba(0, 0, 0, 0.08);
 }
 
-/* Tampilan dasar */
+/* --- Body & Background --- */
 body {
   min-height: 100vh;
   background: linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 45%, var(--bg-3) 100%);
@@ -20,7 +20,7 @@ body {
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-/* Komponen utama */
+/* --- Border Radius Komponen --- */
 .card,
 .accordion-button,
 .btn,
@@ -29,18 +29,19 @@ body {
   border-radius: 1rem;
 }
 
+/* --- Card --- */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
 }
 
-/* Header */
+/* --- Header --- */
 header.bg-primary {
   background: linear-gradient(90deg, var(--primary), var(--secondary)) !important;
 }
 
-/* Badge dan tombol utama */
+/* --- Tombol Utama --- */
 .btn-primary {
   background: var(--primary);
   border-color: var(--primary);
@@ -59,13 +60,13 @@ header.bg-primary {
   border-color: rgba(15, 23, 42, 0.25);
 }
 
-/* Area hasil */
+/* --- Panel Hasil --- */
 #resultPanel {
   white-space: pre-wrap;
   min-height: 120px;
 }
 
-/* Riwayat */
+/* --- Item Riwayat --- */
 .list-group-item {
   border: 1px solid var(--border);
   border-radius: 0.9rem;
@@ -78,24 +79,26 @@ header.bg-primary {
   color: var(--muted);
 }
 
-/* Mode malam */
+/* --- Dark Mode: Variabel Warna --- */
 body.dark-mode {
-  --bg: #184E77;
-  --bg-2: #1E6091;
-  --bg-3: #1A759F;
-  --primary: #1A759F;
+  --bg:        #184E77;
+  --bg-2:      #1E6091;
+  --bg-3:      #1A759F;
+  --primary:   #1A759F;
   --secondary: #184E77;
-  --surface: rgba(7, 21, 35, 0.78);
-  --text: #e6f4ff;
-  --muted: #b7d6ea;
-  --border: rgba(255, 255, 255, 0.12);
+  --surface:   rgba(7, 21, 35, 0.78);
+  --text:      #e6f4ff;
+  --muted:     #b7d6ea;
+  --border:    rgba(255, 255, 255, 0.12);
 }
 
+/* --- Dark Mode: Background --- */
 body.dark-mode {
   background: linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 50%, var(--bg-3) 100%);
   color: var(--text);
 }
 
+/* --- Dark Mode: Komponen --- */
 body.dark-mode .card,
 body.dark-mode .accordion-button,
 body.dark-mode .form-control,
@@ -106,10 +109,12 @@ body.dark-mode .list-group-item {
   color: var(--text);
 }
 
+/* --- Dark Mode: Header --- */
 body.dark-mode header.bg-primary {
   background: linear-gradient(90deg, #184E77, #1E6091, #1A759F) !important;
 }
 
+/* --- Dark Mode: Tombol --- */
 body.dark-mode .btn-primary {
   background: #1E6091;
   border-color: #1E6091;
@@ -127,7 +132,7 @@ body.dark-mode .btn-outline-light {
   border-color: rgba(255, 255, 255, 0.35);
 }
 
-/* Responsive */
+/* --- Responsive: Sticky Panel --- */
 @media (max-width: 991px) {
   .sticky-top {
     position: static !important;
