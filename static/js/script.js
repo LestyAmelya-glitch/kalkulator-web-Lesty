@@ -1,38 +1,94 @@
-/* elemen utama */
-const forms = document.querySelectorAll("form.calc-form");
-const resultCard = document.getElementById("resultCard");
-const resultOverlay = document.getElementById("resultOverlay");
-const resultPanel = document.getElementById("resultPanel");
-const saveHistoryBtn = document.getElementById("saveHistory");
-const closeResultBtn = document.getElementById("closeResult");
-const historyWrapper = document.getElementById("historyWrapper");
-const historyCard = document.getElementById("historyCard");
-const historyList = document.getElementById("historyList");
-const emptyHistory = document.getElementById("emptyHistory");
-const themeToggle = document.getElementById("themeToggle");
+// elemen utama
+const forms           = document.querySelectorAll("form.calc-form");
+const resultCard      = document.getElementById("resultCard");
+const resultOverlay   = document.getElementById("resultOverlay");
+const resultPanel     = document.getElementById("resultPanel");
+const saveHistoryBtn  = document.getElementById("saveHistory");
+const closeResultBtn  = document.getElementById("closeResult");
+const historyWrapper  = document.getElementById("historyWrapper");
+const historyCard     = document.getElementById("historyCard");
+const historyList     = document.getElementById("historyList");
+const emptyHistory    = document.getElementById("emptyHistory");
+const themeToggle     = document.getElementById("themeToggle");
 const clearHistoryBtn = document.getElementById("clearHistory");
-const logikaOperator = document.getElementById("logikaOperator");
-const logikaBGroup = document.getElementById("logikaBGroup");
-const transformChooser = document.getElementById("transformChooser");
-const transformAccordion = document.getElementById("transformAccordion");
-const transformChoices = document.querySelectorAll(".transform-choice");
+const logikaOperator  = document.getElementById("logikaOperator");
+const logikaBGroup    = document.getElementById("logikaBGroup");
+const transformChooser        = document.getElementById("transformChooser");
+const transformAccordion      = document.getElementById("transformAccordion");
+const transformChoices        = document.querySelectorAll(".transform-choice");
 const transformAccordionItems = document.querySelectorAll("#transformAccordion .accordion-item");
-const transformTabButton = document.querySelector('button[data-bs-target="#transformasi"]');
+const transformTabButton      = document.querySelector('button[data-bs-target="#transformasi"]');
 
-/* suara */
-const clickSound = new Audio("/static/suaratambahan/efektekan.mp3");
+// suara
+const clickSound  = new Audio("/static/suaratambahan/efektekan.mp3");
 const resultSound = new Audio("/static/suaratambahan/efekhasil.mp3");
 
-/* data awal */
-let history = JSON.parse(localStorage.getItem("calcHistory") || "[]");
+// data awal
+let history       = JSON.parse(localStorage.getItem("calcHistory") || "[]");
 let pendingResult = null;
 
-/* awal */
+// jalankan saat load
 renderHistory();
 applySavedTheme();
 updateLogikaFields();
+pageEntranceAnimation();
 
-/* klik tombol */
+// =============================================
+// TRANSISI MASUK - fade in dari atas
+// =============================================
+function pageEntranceAnimation() {
+  document.body.style.opacity = "0";
+  document.body.style.transform = "translateY(16px)";
+  document.body.style.transition = "opacity 0.5s ease, transform 0.5s ease";
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      document.body.style.opacity = "1";
+      document.body.style.transform = "translateY(0)";
+    });
+  });
+}
+
+// =============================================
+// COUNTING UP - animasi angka naik ke hasil
+// =============================================
+function animateCountUp(element, targetValue) {
+  // kalau bukan angka murni, langsung tampil aja
+  const numericValue = parseFloat(targetValue);
+  if (isNaN(numericValue)) {
+    element.textContent = targetValue;
+    return;
+  }
+
+  const isFloat     = targetValue.toString().includes(".");
+  const decimals    = isFloat ? (targetValue.toString().split(".")[1]?.length || 2) : 0;
+  const duration    = 800;
+  const startTime   = performance.now();
+  const startValue  = 0;
+
+  function update(currentTime) {
+    const elapsed  = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+
+    // easing: ease out cubic
+    const eased    = 1 - Math.pow(1 - progress, 3);
+    const current  = startValue + (numericValue - startValue) * eased;
+
+    element.textContent = isFloat
+      ? current.toFixed(decimals)
+      : Math.round(current).toString();
+
+    if (progress < 1) {
+      requestAnimationFrame(update);
+    } else {
+      element.textContent = targetValue;
+    }
+  }
+
+  requestAnimationFrame(update);
+}
+
+// klik tombol: suara + ripple
 document.querySelectorAll("button").forEach((button) => {
   button.addEventListener("click", (e) => {
     playClickSound();
@@ -40,21 +96,21 @@ document.querySelectorAll("button").forEach((button) => {
   });
 });
 
-/* submit form */
+// submit form
 forms.forEach((form) => form.addEventListener("submit", handleFormSubmit));
 
-/* simpan dan tutup hasil */
+// tombol hasil
 saveHistoryBtn.addEventListener("click", savePendingResult);
 closeResultBtn.addEventListener("click", closeResultCard);
 
-/* tema */
+// tema & riwayat
 themeToggle.addEventListener("click", toggleTheme);
 clearHistoryBtn.addEventListener("click", clearAllHistory);
 
-/* logika */
+// logika
 logikaOperator.addEventListener("change", updateLogikaFields);
 
-/* transformasi */
+// transformasi
 if (transformTabButton) {
   transformTabButton.addEventListener("shown.bs.tab", backToTransformChooser);
 }
@@ -67,29 +123,26 @@ document.querySelectorAll(".transform-back-btn").forEach((btn) => {
   btn.addEventListener("click", backToTransformChooser);
 });
 
-/* bunyi klik */
+// bunyi klik
 function playClickSound() {
   clickSound.currentTime = 0;
   clickSound.play().catch(() => {});
 }
 
-/* ripple */
+// ripple
 function addRipple(button, event) {
   const ripple = document.createElement("span");
   ripple.classList.add("ripple");
-
   const rect = button.getBoundingClientRect();
   const size = Math.max(rect.width, rect.height);
-
-  ripple.style.width = ripple.style.height = `${size}px`;
-  ripple.style.left = `${event.clientX - rect.left - size / 2}px`;
-  ripple.style.top = `${event.clientY - rect.top - size / 2}px`;
-
+  ripple.style.width  = ripple.style.height = `${size}px`;
+  ripple.style.left   = `${event.clientX - rect.left - size / 2}px`;
+  ripple.style.top    = `${event.clientY - rect.top  - size / 2}px`;
   button.appendChild(ripple);
   ripple.addEventListener("animationend", () => ripple.remove());
 }
 
-/* tema */
+// toggle tema
 function toggleTheme() {
   const isDark = document.body.classList.toggle("dark-mode");
   themeToggle.textContent = isDark ? "Light Mode" : "Dark Mode";
@@ -100,7 +153,6 @@ function toggleTheme() {
 function updateMascot(isDark) {
   const mascot = document.getElementById("mascotImg");
   if (!mascot) return;
-
   mascot.src = isDark
     ? "/static/gambar/mengblueberry.png"
     : "/static/gambar/mengpisang.png";
@@ -113,14 +165,14 @@ function applySavedTheme() {
   updateMascot(isDark);
 }
 
-/* logika NOT */
+// logika NOT
 function updateLogikaFields() {
   const isNot = logikaOperator.value === "not";
   logikaBGroup.style.display = isNot ? "none" : "block";
   logikaBGroup.querySelector("select").toggleAttribute("required", !isNot);
 }
 
-/* transformasi */
+// transformasi
 function resetTransformAccordion() {
   transformAccordionItems.forEach((item) => item.classList.remove("d-none"));
   document.querySelectorAll("#transformAccordion .accordion-collapse").forEach((collapseEl) => {
@@ -132,14 +184,12 @@ function resetTransformAccordion() {
 
 function showSelectedTransform(target) {
   if (!target || !transformAccordion) return;
-
-  const collapseEl = document.querySelector(target);
+  const collapseEl   = document.querySelector(target);
   const selectedItem = collapseEl?.closest(".accordion-item");
   if (!collapseEl || !selectedItem) return;
 
   transformChooser.classList.add("d-none");
   transformAccordion.classList.remove("d-none");
-
   transformAccordionItems.forEach((item) => {
     item.classList.toggle("d-none", item !== selectedItem);
   });
@@ -165,18 +215,15 @@ function backToTransformChooser() {
   resetTransformAccordion();
 }
 
-/* kirim data */
+// kirim data ke backend
 async function handleFormSubmit(event) {
   event.preventDefault();
-
-  const form = event.currentTarget;
+  const form   = event.currentTarget;
   const apiUrl = form.dataset.api;
-  const label = form.dataset.label;
+  const label  = form.dataset.label;
 
   const body = {};
-  new FormData(form).forEach((value, key) => {
-    body[key] = value.trim();
-  });
+  new FormData(form).forEach((value, key) => (body[key] = value.trim()));
 
   try {
     const response = await fetch(apiUrl, {
@@ -186,19 +233,15 @@ async function handleFormSubmit(event) {
     });
 
     const data = await response.json();
-
-    if (!response.ok) {
-      renderError(data.error || "Terjadi kesalahan.");
-      return;
-    }
-
+    if (!response.ok) { renderError(data.error || "Terjadi kesalahan."); return; }
     showResult(data, label);
+
   } catch {
     renderError("Tidak bisa terhubung ke server.");
   }
 }
 
-/* hasil */
+// tampilkan hasil dengan animasi counting up
 function showResult(data, category) {
   pendingResult = { category, data };
 
@@ -206,9 +249,10 @@ function showResult(data, category) {
     ? `<ol class="ps-3 mb-0">${data.steps.map((s) => `<li>${s}</li>`).join("")}</ol>`
     : "";
 
+  // hasil dimasukkan dulu tanpa nilai, nanti diisi counting up
   resultPanel.innerHTML = `
     <div class="mb-3"><span class="badge bg-info text-dark">${category}</span></div>
-    <p class="mb-1"><strong>Hasil:</strong> ${formatResult(data)}</p>
+    <p class="mb-1"><strong>Hasil:</strong> <span id="countUpValue">0</span></p>
     <p class="mb-1"><strong>Formula:</strong> ${data.formula || "-"}</p>
     <div><strong>Langkah:</strong>${stepsHtml}</div>
   `;
@@ -220,6 +264,19 @@ function showResult(data, category) {
     resultOverlay.classList.add("show");
     resultCard.classList.add("show-popup");
   });
+
+  // jalankan counting up setelah kartu muncul
+  const countEl     = document.getElementById("countUpValue");
+  const resultValue = formatResult(data);
+
+  setTimeout(() => {
+    // kalau array (fibonacci), langsung tampil
+    if (Array.isArray(data.result)) {
+      countEl.textContent = resultValue;
+    } else {
+      animateCountUp(countEl, resultValue);
+    }
+  }, 200);
 
   resultSound.currentTime = 0;
   resultSound.play().catch(() => {});
@@ -259,25 +316,21 @@ function savePendingResult() {
   closeResultCard();
 }
 
-/* riwayat */
+// riwayat
 function addToHistory(label, data) {
   const entry = {
     id: Date.now(),
     timestamp: new Date().toLocaleString("id-ID", {
-      hour: "2-digit",
-      minute: "2-digit",
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
+      hour: "2-digit", minute: "2-digit",
+      day: "2-digit", month: "2-digit", year: "numeric",
     }),
     category: label,
-    formula: data.formula || "-",
-    result: formatResult(data),
+    formula:  data.formula || "-",
+    result:   formatResult(data),
   };
 
   history.unshift(entry);
   if (history.length > 10) history.pop();
-
   localStorage.setItem("calcHistory", JSON.stringify(history));
   renderHistory();
 }
