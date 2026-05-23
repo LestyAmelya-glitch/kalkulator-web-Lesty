@@ -1,6 +1,7 @@
 /* elemen utama */
 const forms = document.querySelectorAll("form.calc-form");
 const resultCard = document.getElementById("resultCard");
+const resultOverlay = document.getElementById("resultOverlay");
 const resultPanel = document.getElementById("resultPanel");
 const saveHistoryBtn = document.getElementById("saveHistory");
 const closeResultBtn = document.getElementById("closeResult");
@@ -212,8 +213,13 @@ function showResult(data, category) {
     <div><strong>Langkah:</strong>${stepsHtml}</div>
   `;
 
+  resultOverlay.classList.remove("d-none");
   resultCard.classList.remove("d-none");
-  requestAnimationFrame(() => resultCard.classList.add("show-popup"));
+
+  requestAnimationFrame(() => {
+    resultOverlay.classList.add("show");
+    resultCard.classList.add("show-popup");
+  });
 
   resultSound.currentTime = 0;
   resultSound.play().catch(() => {});
@@ -234,16 +240,17 @@ function renderError(message) {
 function closeResultCard() {
   pendingResult = null;
   resultCard.classList.remove("show-popup");
+  resultOverlay.classList.remove("show");
 
-  resultCard.addEventListener(
-    "transitionend",
-    () => {
-      if (!resultCard.classList.contains("show-popup")) {
-        resultCard.classList.add("d-none");
-      }
-    },
-    { once: true }
-  );
+  const hideCard = () => {
+    if (!resultCard.classList.contains("show-popup")) {
+      resultCard.classList.add("d-none");
+      resultOverlay.classList.add("d-none");
+    }
+  };
+
+  resultCard.addEventListener("transitionend", hideCard, { once: true });
+  resultOverlay.addEventListener("transitionend", hideCard, { once: true });
 }
 
 function savePendingResult() {
