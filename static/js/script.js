@@ -1,131 +1,181 @@
-// --- Elemen DOM ---
-const forms           = document.querySelectorAll("form.calc-form");
-const resultCard      = document.getElementById("resultCard");
-const resultPanel     = document.getElementById("resultPanel");
-const saveHistoryBtn  = document.getElementById("saveHistory");
-const closeResultBtn  = document.getElementById("closeResult");
-const historyWrapper  = document.getElementById("historyWrapper");
-const historyCard     = document.getElementById("historyCard");
-const historyList     = document.getElementById("historyList");
-const emptyHistory    = document.getElementById("emptyHistory");
-const themeToggle     = document.getElementById("themeToggle");
+/* elemen utama */
+const forms = document.querySelectorAll("form.calc-form");
+const resultCard = document.getElementById("resultCard");
+const resultPanel = document.getElementById("resultPanel");
+const saveHistoryBtn = document.getElementById("saveHistory");
+const closeResultBtn = document.getElementById("closeResult");
+const historyWrapper = document.getElementById("historyWrapper");
+const historyCard = document.getElementById("historyCard");
+const historyList = document.getElementById("historyList");
+const emptyHistory = document.getElementById("emptyHistory");
+const themeToggle = document.getElementById("themeToggle");
 const clearHistoryBtn = document.getElementById("clearHistory");
-const logikaOperator  = document.getElementById("logikaOperator");
-const logikaBGroup    = document.getElementById("logikaBGroup");
+const logikaOperator = document.getElementById("logikaOperator");
+const logikaBGroup = document.getElementById("logikaBGroup");
+const transformChooser = document.getElementById("transformChooser");
+const transformAccordion = document.getElementById("transformAccordion");
+const transformChoices = document.querySelectorAll(".transform-choice");
+const transformAccordionItems = document.querySelectorAll("#transformAccordion .accordion-item");
+const transformTabButton = document.querySelector('button[data-bs-target="#transformasi"]');
 
+/* suara */
+const clickSound = new Audio("/static/suaratambahan/efektekan.mp3");
+const resultSound = new Audio("/static/suaratambahan/efekhasil.mp3");
+
+/* data awal */
+let history = JSON.parse(localStorage.getItem("calcHistory") || "[]");
 let pendingResult = null;
 
-// --- Sound effect ---
-const clickSound   = new Audio("/static/suaratambahan/efektekan.mp3");
-const resultSound  = new Audio("/static/suaratambahan/efekhasil.mp3");
-
-// --- Riwayat dari LocalStorage ---
-let history = JSON.parse(localStorage.getItem("calcHistory") || "[]");
-
-// --- Inisialisasi Awal ---
+/* awal */
 renderHistory();
 applySavedTheme();
 updateLogikaFields();
 
-// --- Transformasi: chooser compact handler ---
-const transformChooser   = document.getElementById("transformChooser");
-const transformAccordion = document.getElementById("transformAccordion");
-const transformChoices   = document.querySelectorAll(".transform-choice");
-const transformBackBtn   = document.getElementById("transformBack");
-const transformTabButton = document.querySelector('button[data-bs-target="#transformasi"]');
-
-if (transformTabButton) {
-  transformTabButton.addEventListener('shown.bs.tab', () => {
-    if (transformChooser) transformChooser.classList.remove('d-none');
-    if (transformAccordion) transformAccordion.classList.add('d-none');
-    // collapse any open panels
-    document.querySelectorAll('#transformAccordion .accordion-collapse.show').forEach(c => {
-      const inst = bootstrap.Collapse.getInstance(c);
-      if (inst) inst.hide();
-    });
-  });
-}
-
-transformChoices.forEach((btn) => {
-  btn.addEventListener('click', (e) => {
-    const target = btn.dataset.target; // e.g. #basisCollapse
-    if (!target) return;
-    transformChooser.classList.add('d-none');
-    transformAccordion.classList.remove('d-none');
-    const collapseEl = document.querySelector(target);
-    if (collapseEl) {
-      // Hide other open collapses first
-      document.querySelectorAll('#transformAccordion .accordion-collapse.show').forEach(c => {
-        const inst = bootstrap.Collapse.getInstance(c);
-        if (inst) inst.hide();
-      });
-      // show requested collapse
-      new bootstrap.Collapse(collapseEl, { toggle: true });
-      collapseEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  });
-});
-
-if (transformBackBtn) {
-  transformBackBtn.addEventListener('click', () => {
-    transformChooser.classList.remove('d-none');
-    transformAccordion.classList.add('d-none');
-    document.querySelectorAll('#transformAccordion .accordion-collapse.show').forEach(c => {
-      const inst = bootstrap.Collapse.getInstance(c);
-      if (inst) inst.hide();
-    });
-  });
-}
-
-// --- Efek klik pada semua tombol ---
+/* klik tombol */
 document.querySelectorAll("button").forEach((button) => {
-  button.addEventListener("click", () => {
-    clickSound.currentTime = 0;
-    clickSound.play().catch(() => {});
+  button.addEventListener("click", (e) => {
+    playClickSound();
+    addRipple(button, e);
   });
 });
 
-// --- Event Submit Semua Form ---
+/* submit form */
 forms.forEach((form) => form.addEventListener("submit", handleFormSubmit));
 
-// --- Tombol hasil ---
+/* simpan dan tutup hasil */
 saveHistoryBtn.addEventListener("click", savePendingResult);
 closeResultBtn.addEventListener("click", closeResultCard);
 
-// --- Toggle Dark / Light Mode ---
-themeToggle.addEventListener("click", () => {
-  document.body.classList.toggle("dark-mode");
-  const isDark = document.body.classList.contains("dark-mode");
-  themeToggle.textContent = isDark ? "Light Mode" : "Dark Mode";
-  localStorage.setItem("themeMode", isDark ? "dark" : "light");
-});
+/* tema */
+themeToggle.addEventListener("click", toggleTheme);
+clearHistoryBtn.addEventListener("click", clearAllHistory);
 
-// --- Hapus Semua Riwayat ---
-clearHistoryBtn.addEventListener("click", () => {
-  history = [];
-  localStorage.removeItem("calcHistory");
-  renderHistory();
-});
-
-// --- Tampilkan / Sembunyikan Input B pada NOT ---
+/* logika */
 logikaOperator.addEventListener("change", updateLogikaFields);
 
+/* transformasi */
+if (transformTabButton) {
+  transformTabButton.addEventListener("shown.bs.tab", backToTransformChooser);
+}
+
+transformChoices.forEach((btn) => {
+  btn.addEventListener("click", () => showSelectedTransform(btn.dataset.target));
+});
+
+document.querySelectorAll(".transform-back-btn").forEach((btn) => {
+  btn.addEventListener("click", backToTransformChooser);
+});
+
+/* bunyi klik */
+function playClickSound() {
+  clickSound.currentTime = 0;
+  clickSound.play().catch(() => {});
+}
+
+/* ripple */
+function addRipple(button, event) {
+  const ripple = document.createElement("span");
+  ripple.classList.add("ripple");
+
+  const rect = button.getBoundingClientRect();
+  const size = Math.max(rect.width, rect.height);
+
+  ripple.style.width = ripple.style.height = `${size}px`;
+  ripple.style.left = `${event.clientX - rect.left - size / 2}px`;
+  ripple.style.top = `${event.clientY - rect.top - size / 2}px`;
+
+  button.appendChild(ripple);
+  ripple.addEventListener("animationend", () => ripple.remove());
+}
+
+/* tema */
+function toggleTheme() {
+  const isDark = document.body.classList.toggle("dark-mode");
+  themeToggle.textContent = isDark ? "Light Mode" : "Dark Mode";
+  localStorage.setItem("themeMode", isDark ? "dark" : "light");
+  updateMascot(isDark);
+}
+
+function updateMascot(isDark) {
+  const mascot = document.getElementById("mascotImg");
+  if (!mascot) return;
+
+  mascot.src = isDark
+    ? "/static/gambar/mengblueberry.png"
+    : "/static/gambar/mengpisang.png";
+}
+
+function applySavedTheme() {
+  const isDark = localStorage.getItem("themeMode") === "dark";
+  document.body.classList.toggle("dark-mode", isDark);
+  themeToggle.textContent = isDark ? "Light Mode" : "Dark Mode";
+  updateMascot(isDark);
+}
+
+/* logika NOT */
 function updateLogikaFields() {
   const isNot = logikaOperator.value === "not";
   logikaBGroup.style.display = isNot ? "none" : "block";
   logikaBGroup.querySelector("select").toggleAttribute("required", !isNot);
 }
 
-// --- Kirim Form ke Backend ---
+/* transformasi */
+function resetTransformAccordion() {
+  transformAccordionItems.forEach((item) => item.classList.remove("d-none"));
+  document.querySelectorAll("#transformAccordion .accordion-collapse").forEach((collapseEl) => {
+    collapseEl.classList.remove("show");
+    const toggleButton = document.querySelector(`[data-bs-target="#${collapseEl.id}"]`);
+    if (toggleButton) toggleButton.classList.add("collapsed");
+  });
+}
+
+function showSelectedTransform(target) {
+  if (!target || !transformAccordion) return;
+
+  const collapseEl = document.querySelector(target);
+  const selectedItem = collapseEl?.closest(".accordion-item");
+  if (!collapseEl || !selectedItem) return;
+
+  transformChooser.classList.add("d-none");
+  transformAccordion.classList.remove("d-none");
+
+  transformAccordionItems.forEach((item) => {
+    item.classList.toggle("d-none", item !== selectedItem);
+  });
+
+  document.querySelectorAll("#transformAccordion .accordion-collapse.show").forEach((cur) => {
+    const inst = bootstrap.Collapse.getInstance(cur);
+    if (inst) inst.hide();
+  });
+
+  new bootstrap.Collapse(collapseEl, { toggle: true });
+  collapseEl.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function backToTransformChooser() {
+  if (transformChooser) transformChooser.classList.remove("d-none");
+  if (transformAccordion) transformAccordion.classList.add("d-none");
+
+  document.querySelectorAll("#transformAccordion .accordion-collapse.show").forEach((collapseEl) => {
+    const inst = bootstrap.Collapse.getInstance(collapseEl);
+    if (inst) inst.hide();
+  });
+
+  resetTransformAccordion();
+}
+
+/* kirim data */
 async function handleFormSubmit(event) {
   event.preventDefault();
-  const form   = event.currentTarget;
-  const apiUrl = form.dataset.api;
-  const label  = form.dataset.label;
 
-  // --- Kumpulkan Data Form ---
+  const form = event.currentTarget;
+  const apiUrl = form.dataset.api;
+  const label = form.dataset.label;
+
   const body = {};
-  new FormData(form).forEach((value, key) => (body[key] = value.trim()));
+  new FormData(form).forEach((value, key) => {
+    body[key] = value.trim();
+  });
 
   try {
     const response = await fetch(apiUrl, {
@@ -135,16 +185,19 @@ async function handleFormSubmit(event) {
     });
 
     const data = await response.json();
-    if (!response.ok) { renderError(data.error || "Terjadi kesalahan."); return; }
+
+    if (!response.ok) {
+      renderError(data.error || "Terjadi kesalahan.");
+      return;
+    }
 
     showResult(data, label);
-
   } catch {
     renderError("Tidak bisa terhubung ke server.");
   }
 }
 
-// --- Tampilkan Hasil ke Panel ---
+/* hasil */
 function showResult(data, category) {
   pendingResult = { category, data };
 
@@ -160,36 +213,16 @@ function showResult(data, category) {
   `;
 
   resultCard.classList.remove("d-none");
-  requestAnimationFrame(() => {
-    resultCard.classList.add("show-popup");
-  });
+  requestAnimationFrame(() => resultCard.classList.add("show-popup"));
 
   resultSound.currentTime = 0;
   resultSound.play().catch(() => {});
 }
 
-function closeResultCard() {
-  pendingResult = null;
-  resultCard.classList.remove("show-popup");
-  resultCard.addEventListener("transitionend", () => {
-    if (!resultCard.classList.contains("show-popup")) {
-      resultCard.classList.add("d-none");
-    }
-  }, { once: true });
-}
-
-function savePendingResult() {
-  if (!pendingResult) return;
-  addToHistory(pendingResult.category, pendingResult.data);
-  closeResultCard();
-}
-
-// --- Format Hasil (Array atau Angka) ---
 function formatResult(data) {
   return Array.isArray(data.result) ? data.result.join(", ") : data.result;
 }
 
-// --- Tampilkan Pesan Error ---
 function renderError(message) {
   resultPanel.innerHTML = `
     <div class="alert alert-danger mb-0" role="alert">
@@ -198,26 +231,50 @@ function renderError(message) {
   `;
 }
 
-// --- Simpan Entri ke Riwayat ---
+function closeResultCard() {
+  pendingResult = null;
+  resultCard.classList.remove("show-popup");
+
+  resultCard.addEventListener(
+    "transitionend",
+    () => {
+      if (!resultCard.classList.contains("show-popup")) {
+        resultCard.classList.add("d-none");
+      }
+    },
+    { once: true }
+  );
+}
+
+function savePendingResult() {
+  if (!pendingResult) return;
+  addToHistory(pendingResult.category, pendingResult.data);
+  closeResultCard();
+}
+
+/* riwayat */
 function addToHistory(label, data) {
   const entry = {
     id: Date.now(),
     timestamp: new Date().toLocaleString("id-ID", {
-      hour: "2-digit", minute: "2-digit",
-      day: "2-digit", month: "2-digit", year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
     }),
     category: label,
-    formula:  data.formula || "-",
-    result:   formatResult(data),
+    formula: data.formula || "-",
+    result: formatResult(data),
   };
 
   history.unshift(entry);
   if (history.length > 10) history.pop();
+
   localStorage.setItem("calcHistory", JSON.stringify(history));
   renderHistory();
 }
 
-// --- Render Daftar Riwayat ---
 function renderHistory() {
   historyList.innerHTML = "";
 
@@ -229,7 +286,6 @@ function renderHistory() {
 
   historyWrapper.classList.remove("d-none");
   historyCard.classList.add("show-popup");
-
   emptyHistory.style.display = "none";
 
   history.forEach((item) => {
@@ -247,9 +303,8 @@ function renderHistory() {
   });
 }
 
-// --- Terapkan Tema Tersimpan ---
-function applySavedTheme() {
-  const isDark = localStorage.getItem("themeMode") === "dark";
-  document.body.classList.toggle("dark-mode", isDark);
-  themeToggle.textContent = isDark ? "Light Mode" : "Dark Mode";
+function clearAllHistory() {
+  history = [];
+  localStorage.removeItem("calcHistory");
+  renderHistory();
 }
