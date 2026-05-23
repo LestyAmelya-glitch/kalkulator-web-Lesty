@@ -1,10 +1,9 @@
 from flask import Flask, render_template, request, jsonify
 import math
 
-# --- Inisialisasi Flask ---
 app = Flask(__name__)
 
-# --- Kurs Mata Uang (Statis) ---
+# kurs statis buat konversi mata uang
 KURS = {
     "IDR": 1,
     "USD": 1 / 16350,
@@ -17,13 +16,18 @@ KURS = {
 }
 
 
-# --- Halaman Utama ---
+# halaman welcome - tampil pertama kali
 @app.route("/")
+def welcome():
+    return render_template("welcome.html")
+
+
+# halaman kalkulator utama
+@app.route("/kalkulator")
 def index():
     return render_template("index.html")
 
 
-# --- Route Aritmatika ---
 @app.route("/api/aritmatika", methods=["POST"])
 def aritmatika():
     data = request.get_json()
@@ -106,7 +110,6 @@ def aritmatika():
     return jsonify({"result": result, "formula": formula, "steps": steps})
 
 
-# --- Route Logika ---
 @app.route("/api/logika", methods=["POST"])
 def logika():
     data = request.get_json()
@@ -118,7 +121,6 @@ def logika():
     except (ValueError, TypeError):
         return jsonify({"error": "Input tidak valid"}), 400
 
-    # --- Perhitungan Operator Logika ---
     if op == "and":     result = a and b
     elif op == "or":    result = a or b
     elif op == "not":   result = not a
@@ -140,21 +142,17 @@ def logika():
     return jsonify({"result": int(result), "label": "TRUE" if result else "FALSE", "formula": formula, "steps": steps})
 
 
-# --- Route Konversi Basis ---
 @app.route("/api/konversi-basis", methods=["POST"])
 def konversi_basis():
-    data = request.get_json()
+    data  = request.get_json()
     nilai = data.get("nilai", "").strip()
     frm   = data.get("dari", "decimal")
     to    = data.get("ke",   "binary")
 
     try:
         bases = {"decimal": 10, "binary": 2, "octal": 8, "hexadecimal": 16}
-
-        # --- Konversi Input ke Desimal ---
         decimal_val = int(nilai, bases[frm])
 
-        # --- Konversi Desimal ke Target ---
         if   to == "decimal":     result = str(decimal_val)
         elif to == "binary":      result = bin(decimal_val)[2:]
         elif to == "octal":       result = oct(decimal_val)[2:]
@@ -174,7 +172,6 @@ def konversi_basis():
         return jsonify({"error": f"Input tidak valid: {str(e)}"}), 400
 
 
-# --- Route Konversi Suhu ---
 @app.route("/api/konversi-suhu", methods=["POST"])
 def konversi_suhu():
     data = request.get_json()
@@ -186,7 +183,6 @@ def konversi_suhu():
     frm = data.get("dari", "celsius")
     to  = data.get("ke",   "fahrenheit")
 
-    # --- Konversi ke Celsius ---
     if   frm == "celsius":    c = nilai
     elif frm == "fahrenheit": c = (nilai - 32) * 5 / 9
     elif frm == "kelvin":     c = nilai - 273.15
@@ -194,7 +190,6 @@ def konversi_suhu():
     else:
         return jsonify({"error": "Satuan asal tidak valid"}), 400
 
-    # --- Konversi Celsius ke Target ---
     if   to == "celsius":    result = c
     elif to == "fahrenheit": result = c * 9 / 5 + 32
     elif to == "kelvin":     result = c + 273.15
@@ -212,7 +207,6 @@ def konversi_suhu():
     return jsonify({"result": result, "formula": formula, "steps": steps})
 
 
-# --- Route Konversi Mata Uang ---
 @app.route("/api/konversi-mata-uang", methods=["POST"])
 def konversi_mata_uang():
     data = request.get_json()
@@ -227,7 +221,6 @@ def konversi_mata_uang():
     if frm not in KURS or to not in KURS:
         return jsonify({"error": "Mata uang tidak tersedia"}), 400
 
-    # --- Konversi via IDR ---
     idr    = nilai / KURS[frm]
     result = round(idr * KURS[to], 4)
 
@@ -241,7 +234,6 @@ def konversi_mata_uang():
     return jsonify({"result": result, "formula": formula, "steps": steps})
 
 
-# --- Route Faktorial ---
 @app.route("/api/faktorial", methods=["POST"])
 def faktorial():
     data = request.get_json()
@@ -264,7 +256,6 @@ def faktorial():
     return jsonify({"result": result, "formula": formula, "steps": steps})
 
 
-# --- Route Fibonacci ---
 @app.route("/api/fibonacci", methods=["POST"])
 def fibonacci():
     data = request.get_json()
@@ -276,7 +267,6 @@ def fibonacci():
     if n < 1:  return jsonify({"error": "n harus minimal 1"}), 400
     if n > 50: return jsonify({"error": "Maksimal 50 suku"}), 400
 
-    # --- Generate Deret Fibonacci ---
     fib = [0, 1]
     for _ in range(2, n):
         fib.append(fib[-1] + fib[-2])
@@ -292,6 +282,5 @@ def fibonacci():
     return jsonify({"result": fib, "last": fib[-1], "formula": formula, "steps": steps})
 
 
-# --- Jalankan Server ---
 if __name__ == "__main__":
     app.run(debug=True)
