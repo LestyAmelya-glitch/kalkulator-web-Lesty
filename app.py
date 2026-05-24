@@ -50,7 +50,7 @@ def aritmatika():
                 f"Rumus: A + B",
                 f"Masukkan nilai: {a} + {b}",
                 f"Hitung: {a} + {b} = {result}",
-                f"✅ Hasil: {result}",
+                f"Hasil: {result}",
             ]
 
         elif op == "kurang":
@@ -61,7 +61,7 @@ def aritmatika():
                 f"Rumus: A - B",
                 f"Masukkan nilai: {a} - {b}",
                 f"Hitung: {a} - {b} = {result}",
-                f"✅ Hasil: {result}",
+                f"Hasil: {result}",
             ]
 
         elif op == "kali":
@@ -72,7 +72,7 @@ def aritmatika():
                 f"Rumus: A × B",
                 f"Masukkan nilai: {a} × {b}",
                 f"Hitung: {a} × {b} = {result}",
-                f"✅ Hasil: {result}",
+                f"Hasil: {result}",
             ]
 
         elif op == "bagi":
@@ -85,7 +85,7 @@ def aritmatika():
                 f"Rumus: A ÷ B",
                 f"Masukkan nilai: {a} ÷ {b}",
                 f"Hitung: {a} ÷ {b} = {round(result, 10)}",
-                f"✅ Hasil: {round(result, 10)}",
+                f"Hasil: {round(result, 10)}",
             ]
 
         elif op == "pangkat":
@@ -97,7 +97,7 @@ def aritmatika():
                 f"Masukkan nilai: {a}^{int(b)}",
                 f"Artinya: {' × '.join([str(a)] * int(b)) if int(b) <= 6 else str(a) + ' × ... (sebanyak ' + str(int(b)) + ' kali)'}",
                 f"Hitung: {a}^{int(b)} = {result}",
-                f"✅ Hasil: {result}",
+                f"Hasil: {result}",
             ]
 
         elif op == "akar":
@@ -112,7 +112,7 @@ def aritmatika():
                 f"Masukkan nilai: {a}^(1/{int(b)})",
                 f"Artinya: cari angka yang kalau dipangkatkan {int(b)} hasilnya {a}",
                 f"Hitung: {a}^(1/{int(b)}) = {round(result, 6)}",
-                f"✅ Hasil: {round(result, 6)}",
+                f"Hasil: {round(result, 6)}",
             ]
 
         elif op == "modulus":
@@ -128,7 +128,7 @@ def aritmatika():
                 f"Langkah 1 — Bagi: {a} ÷ {b} = {a/b:.4f}",
                 f"Langkah 2 — Bulatkan ke bawah: floor({a/b:.4f}) = {q}",
                 f"Langkah 3 — Hitung sisa: {a} - ({q} × {b}) = {a} - {q*b} = {result}",
-                f"✅ Hasil: {result}",
+                f"Hasil: {result}",
             ]
 
         elif op == "floor":
@@ -142,7 +142,7 @@ def aritmatika():
                 f"Masukkan nilai: {a} // {b}",
                 f"Langkah 1 — Bagi biasa: {a} ÷ {b} = {a/b:.6f}",
                 f"Langkah 2 — Bulatkan ke bawah: floor({a/b:.6f}) = {result}",
-                f"✅ Hasil: {result}",
+                f"Hasil: {result}",
             ]
 
         else:
@@ -193,7 +193,7 @@ def logika():
             f"Nilai B = {int(b)} ({label_b})",
             f"Cek: {label_a} AND {label_b} = ?",
             f"Karena {'keduanya TRUE' if a and b else 'salah satu atau keduanya FALSE'} → hasil = {label_r}",
-            f"✅ Hasil: {int(result)} ({label_r})",
+            f"Hasil: {int(result)} ({label_r})",
         ]
     elif op == "or":
         steps = [
@@ -203,7 +203,7 @@ def logika():
             f"Nilai B = {int(b)} ({label_b})",
             f"Cek: {label_a} OR {label_b} = ?",
             f"Karena {'minimal satu TRUE' if a or b else 'keduanya FALSE'} → hasil = {label_r}",
-            f"✅ Hasil: {int(result)} ({label_r})",
+            f"Hasil: {int(result)} ({label_r})",
         ]
     elif op == "not":
         steps = [
@@ -212,7 +212,7 @@ def logika():
             f"Nilai A = {int(a)} ({label_a})",
             f"Cek: NOT {label_a} = ?",
             f"Balik nilai: {label_a} → {label_r}",
-            f"✅ Hasil: {int(result)} ({label_r})",
+            f"Hasil: {int(result)} ({label_r})",
         ]
     elif op == "xor":
         steps = [
@@ -222,7 +222,7 @@ def logika():
             f"Nilai B = {int(b)} ({label_b})",
             f"Cek: {label_a} XOR {label_b} = ?",
             f"Karena {'nilainya berbeda' if a ^ b else 'nilainya sama'} → hasil = {label_r}",
-            f"✅ Hasil: {int(result)} ({label_r})",
+            f"Hasil: {int(result)} ({label_r})",
         ]
     elif op == "nand":
         and_result = a and b
@@ -233,7 +233,7 @@ def logika():
             f"Nilai B = {int(b)} ({label_b})",
             f"Langkah 1 — Hitung AND dulu: {label_a} AND {label_b} = {'TRUE' if and_result else 'FALSE'}",
             f"Langkah 2 — Balik hasilnya (NOT): NOT {'TRUE' if and_result else 'FALSE'} = {label_r}",
-            f"✅ Hasil: {int(result)} ({label_r})",
+            f"Hasil: {int(result)} ({label_r})",
         ]
     elif op == "nor":
         or_result = a or b
@@ -244,7 +244,7 @@ def logika():
             f"Nilai B = {int(b)} ({label_b})",
             f"Langkah 1 — Hitung OR dulu: {label_a} OR {label_b} = {'TRUE' if or_result else 'FALSE'}",
             f"Langkah 2 — Balik hasilnya (NOT): NOT {'TRUE' if or_result else 'FALSE'} = {label_r}",
-            f"✅ Hasil: {int(result)} ({label_r})",
+            f"Hasil: {int(result)} ({label_r})",
         ]
 
     return jsonify({"result": int(result), "label": label_r, "formula": formula, "steps": steps})
@@ -345,7 +345,7 @@ def konversi_basis():
             f"Input: {nilai} ({nama_basis[frm]}, basis {bases[frm]})",
             *steps_to_dec,
             *steps_from_dec,
-            f"✅ Hasil: {result} ({nama_basis[to]}, basis {bases[to]})",
+            f"Hasil: {result} ({nama_basis[to]}, basis {bases[to]})",
         ]
 
         return jsonify({"result": result, "formula": formula, "steps": steps})
@@ -405,7 +405,7 @@ def konversi_suhu():
         steps = [
             f"Input: {nilai}° {frm.capitalize()}",
             f"Satuan asal dan tujuan sama, tidak perlu konversi.",
-            f"✅ Hasil: {result}° {to.capitalize()}",
+            f"Hasil: {result}° {to.capitalize()}",
         ]
     else:
         steps = [
@@ -413,7 +413,7 @@ def konversi_suhu():
             f"Strategi: konversi ke Celsius dulu, lalu ke {to.capitalize()}",
             f"Langkah 1 — ke Celsius: {rumus_ke_c[frm]}",
             f"Langkah 2 — ke {to.capitalize()}: {rumus_dari_c[to]}",
-            f"✅ Hasil: {result}° {to.capitalize()}",
+            f"Hasil: {result}° {to.capitalize()}",
         ]
 
     return jsonify({"result": result, "formula": formula, "steps": steps})
@@ -440,11 +440,11 @@ def konversi_mata_uang():
     formula = f"1 {frm} = {rate} {to}"
     steps   = [
         f"Input: {nilai} {frm}",
-        f"⚠️ Catatan: kurs bersifat statis/ilustratif",
+        f"Catatan: kurs bersifat statis/ilustratif",
         f"Langkah 1 — ke IDR dulu: {nilai} {frm} ÷ {KURS[frm]} = {round(idr, 2)} IDR",
         f"Langkah 2 — ke {to}: {round(idr, 2)} IDR × {KURS[to]} = {result} {to}",
         f"Atau langsung: {nilai} × {rate} = {result} {to}",
-        f"✅ Hasil: {result} {to}",
+        f"Hasil: {result} {to}",
     ]
 
     return jsonify({"result": result, "formula": formula, "steps": steps})
@@ -480,7 +480,7 @@ def faktorial():
         f"{n}! = {urutan}",
         f"Proses perkalian bertahap:",
         *acc_steps,
-        f"✅ Hasil: {n}! = {result}",
+        f"Hasil: {n}! = {result}",
     ]
 
     return jsonify({"result": result, "formula": formula, "steps": steps})
@@ -517,7 +517,7 @@ def fibonacci():
         f"Proses pembentukan deret:",
         *fib_steps,
         f"Deret lengkap ({n} suku): {', '.join(map(str, fib))}",
-        f"✅ Suku ke-{n}: {fib[-1]}",
+        f"Suku ke-{n}: {fib[-1]}",
     ]
 
     return jsonify({"result": fib, "last": fib[-1], "formula": formula, "steps": steps})
