@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
   <style>
-    /* preview gambar operator */
+    /* preview gambar operator aritmatika */
     #operatorPreview {
       width: 110px;
       transition: opacity 0.18s ease, transform 0.18s ease;
@@ -21,6 +21,33 @@
       display: flex;
       align-items: center;
       justify-content: center;
+    }
+
+    /* tombol transformasi dengan gambar */
+    .transform-choice {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.6rem 0.9rem;
+      min-width: 120px;
+    }
+
+    .transform-choice img {
+      width: 64px;
+      height: 64px;
+      object-fit: contain;
+      transition: opacity 0.18s ease, transform 0.18s ease;
+      filter: drop-shadow(0 3px 6px rgba(0,0,0,0.12));
+    }
+
+    .transform-choice:hover img {
+      transform: translateY(-3px) scale(1.08);
+    }
+
+    .transform-choice span {
+      font-size: 0.82rem;
+      font-weight: 600;
     }
   </style>
 </head>
@@ -72,8 +99,6 @@
 
                 <form class="calc-form" data-api="/api/aritmatika" data-label="Aritmatika">
                   <div class="row g-3 align-items-start">
-
-                    <!-- kolom kiri: input -->
                     <div class="col-sm-8">
                       <div class="row g-3">
                         <div class="col-sm-6">
@@ -100,16 +125,13 @@
                       </div>
                       <button type="submit" class="btn btn-primary mt-4">Hitung</button>
                     </div>
-
-                    <!-- kolom kanan: preview gambar operator -->
                     <div class="col-sm-4 operator-preview-wrap">
                       <img
                         id="operatorPreview"
                         src="{{ url_for('static', filename='gambar/tambahpisang.png') }}"
-                        alt="operator"
+                        alt="operator preview"
                       >
                     </div>
-
                   </div>
                 </form>
               </div>
@@ -122,7 +144,6 @@
               <div class="card-body">
                 <h2 class="h5">Operator Logika</h2>
                 <p class="text-muted">AND, OR, NOT, XOR, NAND, dan NOR.</p>
-
                 <form class="calc-form" data-api="/api/logika" data-label="Logika">
                   <div class="row g-3">
                     <div class="col-sm-4">
@@ -163,11 +184,48 @@
               <div class="card shadow-sm">
                 <div class="card-body">
                   <h3 class="h6 mb-3">Pilih Operasi Transformasi</h3>
-                  <div class="d-flex flex-wrap gap-2">
-                    <button type="button" class="btn btn-outline-primary transform-choice" data-target="#basisCollapse">Konversi Basis</button>
-                    <button type="button" class="btn btn-outline-primary transform-choice" data-target="#suhuCollapse">Konversi Suhu</button>
-                    <button type="button" class="btn btn-outline-primary transform-choice" data-target="#uangCollapse">Konversi Mata Uang</button>
-                    <button type="button" class="btn btn-outline-primary transform-choice" data-target="#bonusCollapse">Faktorial & Fibonacci</button>
+                  <div class="d-flex flex-wrap gap-3">
+
+                    <!-- Konversi Basis -->
+                    <button type="button" class="btn btn-outline-primary transform-choice" data-target="#basisCollapse">
+                      <img id="transformPreview-basis"
+                        src="{{ url_for('static', filename='gambar/barisbilanganganpisang.png') }}"
+                        alt="basis">
+                      <span>Konversi Basis</span>
+                    </button>
+
+                    <!-- Konversi Suhu -->
+                    <button type="button" class="btn btn-outline-primary transform-choice" data-target="#suhuCollapse">
+                      <img id="transformPreview-suhu"
+                        src="{{ url_for('static', filename='gambar/suhupisang.png') }}"
+                        alt="suhu">
+                      <span>Konversi Suhu</span>
+                    </button>
+
+                    <!-- Konversi Mata Uang -->
+                    <button type="button" class="btn btn-outline-primary transform-choice" data-target="#uangCollapse">
+                      <img id="transformPreview-uang"
+                        src="{{ url_for('static', filename='gambar/matauangpisang.png') }}"
+                        alt="mata uang">
+                      <span>Konversi Mata Uang</span>
+                    </button>
+
+                    <!-- Faktorial -->
+                    <button type="button" class="btn btn-outline-primary transform-choice" data-target="#faktorialCollapse">
+                      <img id="transformPreview-faktorial"
+                        src="{{ url_for('static', filename='gambar/faktorialpisang.png') }}"
+                        alt="faktorial">
+                      <span>Faktorial</span>
+                    </button>
+
+                    <!-- Fibonacci -->
+                    <button type="button" class="btn btn-outline-primary transform-choice" data-target="#fibonacciCollapse">
+                      <img id="transformPreview-fibonacci"
+                        src="{{ url_for('static', filename='gambar/fibonaccipisang.png') }}"
+                        alt="fibonacci">
+                      <span>Fibonacci</span>
+                    </button>
+
                   </div>
                   <p class="small text-muted mt-3 mb-0">Silahkan pilih operasi hitung yang mau kamu gunakan.</p>
                 </div>
@@ -175,7 +233,8 @@
             </div>
 
             <div class="accordion d-none" id="transformAccordion">
-              <!-- Basis -->
+
+              <!-- Konversi Basis -->
               <div class="accordion-item">
                 <h2 class="accordion-header">
                   <div class="d-flex align-items-center justify-content-between w-100">
@@ -216,7 +275,7 @@
                 </div>
               </div>
 
-              <!-- Suhu -->
+              <!-- Konversi Suhu -->
               <div class="accordion-item">
                 <h2 class="accordion-header">
                   <div class="d-flex align-items-center justify-content-between w-100">
@@ -257,7 +316,7 @@
                 </div>
               </div>
 
-              <!-- Mata Uang -->
+              <!-- Konversi Mata Uang -->
               <div class="accordion-item">
                 <h2 class="accordion-header">
                   <div class="d-flex align-items-center justify-content-between w-100">
@@ -306,20 +365,20 @@
                 </div>
               </div>
 
-              <!-- Faktorial & Fibonacci -->
+              <!-- Faktorial -->
               <div class="accordion-item">
                 <h2 class="accordion-header">
                   <div class="d-flex align-items-center justify-content-between w-100">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#bonusCollapse">Faktorial dan Fibonacci</button>
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faktorialCollapse">Faktorial</button>
                     <button type="button" class="btn btn-sm btn-outline-secondary ms-2 transform-back-btn">Kembali</button>
                   </div>
                 </h2>
-                <div id="bonusCollapse" class="accordion-collapse collapse" data-bs-parent="#transformAccordion">
+                <div id="faktorialCollapse" class="accordion-collapse collapse" data-bs-parent="#transformAccordion">
                   <div class="accordion-body">
-                    <form class="calc-form mb-3" data-api="/api/faktorial" data-label="Faktorial">
+                    <form class="calc-form" data-api="/api/faktorial" data-label="Faktorial">
                       <div class="row g-3">
                         <div class="col-sm-8">
-                          <label class="form-label">n (Faktorial)</label>
+                          <label class="form-label">n (0 - 20)</label>
                           <input class="form-control" type="number" name="n" min="0" max="20" value="5" required>
                         </div>
                         <div class="col-sm-4 d-flex align-items-end">
@@ -327,10 +386,24 @@
                         </div>
                       </div>
                     </form>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Fibonacci -->
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <div class="d-flex align-items-center justify-content-between w-100">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#fibonacciCollapse">Fibonacci</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary ms-2 transform-back-btn">Kembali</button>
+                  </div>
+                </h2>
+                <div id="fibonacciCollapse" class="accordion-collapse collapse" data-bs-parent="#transformAccordion">
+                  <div class="accordion-body">
                     <form class="calc-form" data-api="/api/fibonacci" data-label="Fibonacci">
                       <div class="row g-3">
                         <div class="col-sm-8">
-                          <label class="form-label">Jumlah Suku (Fibonacci)</label>
+                          <label class="form-label">Jumlah Suku (1 - 50)</label>
                           <input class="form-control" type="number" name="n" min="1" max="50" value="10" required>
                         </div>
                         <div class="col-sm-4 d-flex align-items-end">
@@ -341,6 +414,7 @@
                   </div>
                 </div>
               </div>
+
             </div>
           </div>
         </div>
