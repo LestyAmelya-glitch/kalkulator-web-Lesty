@@ -27,16 +27,35 @@ const resultSound = new Audio("/static/suaratambahan/efekhasil.mp3");
 let history       = JSON.parse(localStorage.getItem("calcHistory") || "[]");
 let pendingResult = null;
 
+// mapping gambar per operator logika
+const logikaImages = {
+  and:  { pisang: "andpisang.png",  blubery: "andblubery.png" },
+  or:   { pisang: "orpisang.png",   blubery: "orblubery.png" },
+  not:  { pisang: "notpisang.png",  blubery: "notblubery.png" },
+  xor:  { pisang: "xorpisang.png",  blubery: "xorblubery.png" },
+  nand: { pisang: "nandpisang.png", blubery: "nandblubery.png" },
+  nor:  { pisang: "norpisang.png",  blubery: "norblubery.png" },
+};
+
 // mapping gambar per operator aritmatika
 const operatorImages = {
-  tambah:  { pisang: "tambahpisang.png",       blubery: "tambahblubery.png" },
-  kurang:  { pisang: "kurangpisang.png",        blubery: "kurangblubery.png" },
-  kali:    { pisang: "kalipisang.png",          blubery: "kaliblubery.png" },
-  bagi:    { pisang: "bagipisang.png",          blubery: "bagiblubery.png" },
-  pangkat: { pisang: "pangkatpisang.png",       blubery: "pangkatblubery.png" },
-  akar:    { pisang: "akarpisang.png",          blubery: "akarblubery.png" },
-  modulus: { pisang: "moduluspisang.png",       blubery: "modulusblubery.png" },
-  floor:   { pisang: "floordivisionpisang.png", blubery: "floodivisionblubery.png" },
+  tambah:  { pisang: "tambahpisang.png",        blubery: "tambahblubery.png" },
+  kurang:  { pisang: "kurangpisang.png",         blubery: "kurangblubery.png" },
+  kali:    { pisang: "kalipisang.png",           blubery: "kaliblubery.png" },
+  bagi:    { pisang: "bagipisang.png",           blubery: "bagiblubery.png" },
+  pangkat: { pisang: "pangkatpisang.png",        blubery: "pangkatblubery.png" },
+  akar:    { pisang: "akarpisang.png",           blubery: "akarblubery.png" },
+  modulus: { pisang: "moduluspisang.png",        blubery: "modulusblubery.png" },
+  floor:   { pisang: "floordivisionpisang.png",  blubery: "floodivisionblubery.png" },
+};
+
+// mapping gambar per tombol transformasi
+const transformImages = {
+  basis:    { pisang: "basisbilanganpisang.png", blubery: "basisbilanganblubery.png" },
+  suhu:     { pisang: "suhupisang.png",             blubery: "suhublubery.png" },
+  uang:     { pisang: "matauangpisang.png",         blubery: "matauangblubery.png" },
+  faktorial:{ pisang: "faktorialpisang.png",        blubery: "faktorialblubery.png" },
+  fibonacci:{ pisang: "fibonaccipisang.png",        blubery: "fibonacciblubery.png" },
 };
 
 // jalankan saat load
@@ -45,8 +64,9 @@ applySavedTheme();
 updateLogikaFields();
 pageEntranceAnimation();
 initOperatorPreview();
+initLogikaPreview();
 
-// transisi masuk halaman kalkulator
+// transisi masuk
 function pageEntranceAnimation() {
   document.body.style.opacity    = "0";
   document.body.style.transform  = "translateY(16px)";
@@ -63,18 +83,15 @@ function pageEntranceAnimation() {
 function animateCountUp(element, targetValue) {
   const numericValue = parseFloat(targetValue);
   if (isNaN(numericValue)) { element.textContent = targetValue; return; }
-
-  const isFloat    = targetValue.toString().includes(".");
-  const decimals   = isFloat ? (targetValue.toString().split(".")[1]?.length || 2) : 0;
-  const duration   = 800;
-  const startTime  = performance.now();
-
+  const isFloat   = targetValue.toString().includes(".");
+  const decimals  = isFloat ? (targetValue.toString().split(".")[1]?.length || 2) : 0;
+  const duration  = 800;
+  const startTime = performance.now();
   function update(currentTime) {
     const elapsed  = currentTime - startTime;
     const progress = Math.min(elapsed / duration, 1);
     const eased    = 1 - Math.pow(1 - progress, 3);
     const current  = numericValue * eased;
-
     element.textContent = isFloat ? current.toFixed(decimals) : Math.round(current).toString();
     if (progress < 1) requestAnimationFrame(update);
     else element.textContent = targetValue;
@@ -82,44 +99,88 @@ function animateCountUp(element, targetValue) {
   requestAnimationFrame(update);
 }
 
-// tampilkan gambar maskot sesuai operator yang dipilih
+// helper ganti gambar dengan animasi pop
+function swapImage(imgEl, newSrc) {
+  if (!imgEl) return;
+  imgEl.style.opacity   = "0";
+  imgEl.style.transform = "scale(0.7) rotate(-8deg)";
+  setTimeout(() => {
+    imgEl.src             = newSrc;
+    imgEl.style.opacity   = "1";
+    imgEl.style.transform = "scale(1) rotate(0deg)";
+  }, 180);
+}
+
+// preview gambar operator logika
+function initLogikaPreview() {
+  const logikaSelect = document.getElementById("logikaOperator");
+  const previewImg   = document.getElementById("logikaPreview");
+  if (!logikaSelect || !previewImg) return;
+
+  function updatePreview() {
+    const op    = logikaSelect.value;
+    const isDark = document.body.classList.contains("dark-mode");
+    const theme  = isDark ? "blubery" : "pisang";
+    const imgs   = logikaImages[op];
+    if (imgs) swapImage(previewImg, `/static/gambar/${imgs[theme]}`);
+  }
+
+  logikaSelect.addEventListener("change", updatePreview);
+  updatePreview();
+}
+
+// update preview logika saat tema berubah
+function updateLogikaPreview() {
+  const logikaSelect = document.getElementById("logikaOperator");
+  const previewImg   = document.getElementById("logikaPreview");
+  if (!logikaSelect || !previewImg) return;
+  const op    = logikaSelect.value;
+  const isDark = document.body.classList.contains("dark-mode");
+  const theme  = isDark ? "blubery" : "pisang";
+  const imgs   = logikaImages[op];
+  if (imgs) previewImg.src = `/static/gambar/${imgs[theme]}`;
+}
+
+// preview gambar operator aritmatika
 function initOperatorPreview() {
   const operatorSelect = document.querySelector('select[name="operator"]');
   const previewImg     = document.getElementById("operatorPreview");
   if (!operatorSelect || !previewImg) return;
 
   function updatePreview() {
-    const op     = operatorSelect.value;
+    const op    = operatorSelect.value;
     const isDark = document.body.classList.contains("dark-mode");
     const theme  = isDark ? "blubery" : "pisang";
     const imgs   = operatorImages[op];
-    if (!imgs) return;
-
-    // animasi ganti gambar
-    previewImg.style.opacity   = "0";
-    previewImg.style.transform = "scale(0.7) rotate(-8deg)";
-    setTimeout(() => {
-      previewImg.src             = `/static/gambar/${imgs[theme]}`;
-      previewImg.style.opacity   = "1";
-      previewImg.style.transform = "scale(1) rotate(0deg)";
-    }, 180);
+    if (imgs) swapImage(previewImg, `/static/gambar/${imgs[theme]}`);
   }
 
   operatorSelect.addEventListener("change", updatePreview);
-  updatePreview(); // jalankan saat pertama load
+  updatePreview();
 }
 
-// update preview saat tema berubah
+// update preview operator saat tema berubah
 function updateOperatorPreview() {
   const operatorSelect = document.querySelector('select[name="operator"]');
   const previewImg     = document.getElementById("operatorPreview");
   if (!operatorSelect || !previewImg) return;
-
   const op    = operatorSelect.value;
   const isDark = document.body.classList.contains("dark-mode");
   const theme  = isDark ? "blubery" : "pisang";
   const imgs   = operatorImages[op];
   if (imgs) previewImg.src = `/static/gambar/${imgs[theme]}`;
+}
+
+// update semua preview transformasi saat tema berubah
+function updateTransformPreviews() {
+  const isDark = document.body.classList.contains("dark-mode");
+  const theme  = isDark ? "blubery" : "pisang";
+  Object.keys(transformImages).forEach((key) => {
+    const img = document.getElementById(`transformPreview-${key}`);
+    if (img && transformImages[key]) {
+      img.src = `/static/gambar/${transformImages[key][theme]}`;
+    }
+  });
 }
 
 // klik tombol: suara + ripple
@@ -130,21 +191,13 @@ document.querySelectorAll("button").forEach((button) => {
   });
 });
 
-// submit form
 forms.forEach((form) => form.addEventListener("submit", handleFormSubmit));
-
-// tombol hasil
 saveHistoryBtn.addEventListener("click", savePendingResult);
 closeResultBtn.addEventListener("click", closeResultCard);
-
-// tema & riwayat
 themeToggle.addEventListener("click", toggleTheme);
 clearHistoryBtn.addEventListener("click", clearAllHistory);
-
-// logika
 logikaOperator.addEventListener("change", updateLogikaFields);
 
-// transformasi
 if (transformTabButton) {
   transformTabButton.addEventListener("shown.bs.tab", backToTransformChooser);
 }
@@ -178,6 +231,8 @@ function toggleTheme() {
   localStorage.setItem("themeMode", isDark ? "dark" : "light");
   updateMascot(isDark);
   updateOperatorPreview();
+  updateLogikaPreview();
+  updateTransformPreviews();
 }
 
 function updateMascot(isDark) {
@@ -246,8 +301,7 @@ async function handleFormSubmit(event) {
   const form   = event.currentTarget;
   const apiUrl = form.dataset.api;
   const label  = form.dataset.label;
-
-  const body = {};
+  const body   = {};
   new FormData(form).forEach((value, key) => (body[key] = value.trim()));
 
   try {
@@ -266,7 +320,6 @@ async function handleFormSubmit(event) {
 
 function showResult(data, category) {
   pendingResult = { category, data };
-
   const stepsHtml = data.steps
     ? `<ol class="ps-3 mb-0">${data.steps.map((s) => `<li>${s}</li>`).join("")}</ol>`
     : "";

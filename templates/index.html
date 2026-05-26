@@ -145,34 +145,46 @@
                 <h2 class="h5">Operator Logika</h2>
                 <p class="text-muted">AND, OR, NOT, XOR, NAND, dan NOR.</p>
                 <form class="calc-form" data-api="/api/logika" data-label="Logika">
-                  <div class="row g-3">
-                    <div class="col-sm-4">
-                      <label class="form-label">Operator</label>
-                      <select class="form-select" id="logikaOperator" name="operator" required>
-                        <option value="and">AND</option>
-                        <option value="or">OR</option>
-                        <option value="not">NOT</option>
-                        <option value="xor">XOR</option>
-                        <option value="nand">NAND</option>
-                        <option value="nor">NOR</option>
-                      </select>
+                  <div class="row g-3 align-items-start">
+                    <div class="col-sm-8">
+                      <div class="row g-3">
+                        <div class="col-sm-4">
+                          <label class="form-label">Operator</label>
+                          <select class="form-select" id="logikaOperator" name="operator" required>
+                            <option value="and">AND</option>
+                            <option value="or">OR</option>
+                            <option value="not">NOT</option>
+                            <option value="xor">XOR</option>
+                            <option value="nand">NAND</option>
+                            <option value="nor">NOR</option>
+                          </select>
+                        </div>
+                        <div class="col-sm-4">
+                          <label class="form-label">Nilai A</label>
+                          <select class="form-select" name="a" required>
+                            <option value="1">1 (TRUE)</option>
+                            <option value="0">0 (FALSE)</option>
+                          </select>
+                        </div>
+                        <div class="col-sm-4" id="logikaBGroup">
+                          <label class="form-label">Nilai B</label>
+                          <select class="form-select" name="b">
+                            <option value="1">1 (TRUE)</option>
+                            <option value="0">0 (FALSE)</option>
+                          </select>
+                        </div>
+                      </div>
+                      <button type="submit" class="btn btn-primary mt-4">Hitung</button>
                     </div>
-                    <div class="col-sm-4">
-                      <label class="form-label">Nilai A</label>
-                      <select class="form-select" name="a" required>
-                        <option value="1">1 (TRUE)</option>
-                        <option value="0">0 (FALSE)</option>
-                      </select>
-                    </div>
-                    <div class="col-sm-4" id="logikaBGroup">
-                      <label class="form-label">Nilai B</label>
-                      <select class="form-select" name="b">
-                        <option value="1">1 (TRUE)</option>
-                        <option value="0">0 (FALSE)</option>
-                      </select>
+                    <div class="col-sm-4 operator-preview-wrap">
+                      <img
+                        id="logikaPreview"
+                        src="{{ url_for('static', filename='gambar/andpisang.png') }}"
+                        alt="logika preview"
+                        style="width:110px; transition: opacity 0.18s ease, transform 0.18s ease; filter: drop-shadow(0 6px 14px rgba(0,0,0,0.15));"
+                      >
                     </div>
                   </div>
-                  <button type="submit" class="btn btn-primary mt-4">Hitung</button>
                 </form>
               </div>
             </div>
@@ -189,7 +201,7 @@
                     <!-- Konversi Basis -->
                     <button type="button" class="btn btn-outline-primary transform-choice" data-target="#basisCollapse">
                       <img id="transformPreview-basis"
-                        src="{{ url_for('static', filename='gambar/barisbilanganganpisang.png') }}"
+                        src="{{ url_for('static', filename='gambar/basisbilanganpisang.png') }}"
                         alt="basis">
                       <span>Konversi Basis</span>
                     </button>
